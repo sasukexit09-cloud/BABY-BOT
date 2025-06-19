@@ -1,28 +1,56 @@
 module.exports = {
   config: {
     name: "uptime",
-    aliases: ["up", "upt"],
+    aliases: ["upt", "up"],
     version: "1.0",
-    author: "VEX_ADNAN",
+    author: "BaYjid", // Author is fixed as "BaYjid"
     role: 0,
     shortDescription: {
-      en: "Displays the uptime of the bot."
+      en: "Displays the total number of users of the bot and check uptime."
     },
     longDescription: {
-      en: "Displays the amount of time that the bot has been running for."
+      en: "Displays the total number of users who have interacted with the bot and check uptime."
     },
-    category: "System",
+    category: "RUNNING-TIME",
     guide: {
-      en: "Use {p}uptime to display the uptime of the bot."
+      en: "Type {pn}"
     }
   },
-  onStart: async function ({ api, event, args }) {
-    const uptime = process.uptime();
-    const seconds = Math.floor(uptime % 60);
-    const minutes = Math.floor((uptime / 60) % 60);
-    const hours = Math.floor((uptime / (60 * 60)) % 24);
-    const days = Math.floor(uptime / (60 * 60 * 24));
-    const uptimeString = `\n\nl ꙰ → ${hours} ʜᴏᴜʀs\n\nl ꙰ → ${minutes} ᴍɪɴᴜᴛᴇs\n\nl ꙰ → ${seconds} sᴇᴄᴏɴᴅ\n\n✧─────────────────✧`;
-    api.sendMessage(`✧─────────────────✧\n\n💥 ʜᴇʟʟᴏ ᴍᴇɪsᴛᴇʀ, ᴛʜᴇ ʙᴏᴛ ʜᴀs ʙᴇᴇɴ ʀᴜɴɴɪɴɢ ғᴏʀ ↓\n↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ ${uptimeString}`, event.threadID);
+  onStart: async function ({ api, event, usersData, threadsData }) {
+    try {
+      const allUsers = await usersData.getAll();
+      const allThreads = await threadsData.getAll();
+      const uptime = process.uptime();
+      const memoryUsage = (process.memoryUsage().rss / 1024 / 1024).toFixed(2);  // Memory usage in MB
+      const cpuLoad = (process.cpuUsage().user / 1000).toFixed(2); // CPU load in milliseconds
+
+      const hours = Math.floor(uptime / 3600);
+      const minutes = Math.floor((uptime % 3600) / 60);
+      const seconds = Math.floor(uptime % 60);
+      
+      const uptimeString = `
+────────────────────
+⏰  𝗛𝗢𝗨𝗥𝗦 : ${hours} 𝗛𝗥
+⌚ 𝗠𝗜𝗡𝗨𝗧𝗘𝗦 : ${minutes} 𝗠𝗜𝗡
+⏳  𝗦𝗘𝗖𝗢𝗡𝗗𝗦 : ${seconds} 𝗦𝗘𝗖
+🧠 𝗠𝗘𝗠𝗢𝗥𝗬 𝗨𝗦𝗔𝗚𝗘 : ${memoryUsage} MB
+💻 𝗖𝗣𝗨 𝗟𝗢𝗔𝗗 : ${cpuLoad} ms
+────────────────────`;
+
+      api.sendMessage(`
+★─────────────────────────★
+➤ 𝐔𝐏𝐓𝐈𝐌𝐄 ✅
+╭‣ 𝐀𝐝𝐦𝐢𝐧 👑
+╰‣ 𝐁𝐚𝐲𝐣𝐢𝐝 くめ
+★─────────────────────────★
+${uptimeString}
+👥 𝐓𝐨𝐭𝐚𝐥 𝗨𝘀𝗲𝗿𝘀 : ${allUsers.length}
+🗂️ 𝐓𝐨𝐭𝐚𝐥 𝗧𝗵𝗿𝗲𝗮𝗱𝘀 : ${allThreads.length}
+★─────────────────────────★
+`, event.threadID);
+    } catch (error) {
+      console.error(error);
+      api.sendMessage("❌ **Error**: Something went wrong while fetching the data.", event.threadID);
+    }
   }
 };
