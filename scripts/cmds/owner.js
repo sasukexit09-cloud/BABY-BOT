@@ -26,7 +26,7 @@ config: {
       nick: '𝑭𝒂𝒓𝒉𝒖𝒖 💫🔥'
     };
 
-    const bold = 'https://i.imgur.com/LbneO8C.mp4'; // Replace with your Google Drive videoid link https://drive.google.com/uc?export=download&id=here put your video id
+    const bold = 'https://files.catbox.moe/ruiryh.mp4'; // Replace with your Google Drive videoid link https://drive.google.com/uc?export=download&id=here put your video id
 
     const tmpFolderPath = path.join(__dirname, 'tmp');
 
