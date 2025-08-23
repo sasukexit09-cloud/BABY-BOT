@@ -10,9 +10,9 @@
 
 ## 👤 OWNER INFO
 
-- 👑 Name: **MaHi**
-- 🏙️ From: **Dhaka**
-- 🎂 Age: **16**
+- 👑 Name: **𝗙𝗮𝗿𝗛𝗮𝗻**
+- 🏙️ From: **𝗦𝗶𝗿𝗮𝗷𝗴𝗮𝗻𝗷**
+- 🎂 Age: **17**
 
 ---
 
