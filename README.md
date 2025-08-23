@@ -1,68 +1,55 @@
-<!-- =========================================================
-  GOAT BOT v2 – README
-  Repo: https://github.com/farhuu0/jibon
-  Author(s): NTKhang • XNIL6X OBITO • Farhuu0
-========================================================= -->
-
-<!-- Banner -->
-<p align="center">
-  <!-- Change this banner URL to your own if you want -->
-  <img src="https://files.catbox.moe/5zsj7r.png" width="900" alt="Goat Bot Banner"/>
-</p>
-
-<h1 align="center">🐐 GOAT BOT v2</h1>
-<p align="center">
-  <b>A Powerful Messenger Bot using Personal Account</b><br/>
-  Fun • Secure • Customizable
-</p>
+<h1 align="center">FarHan's Bot </h1>
 
 <p align="center">
-  <a href="https://github.com/farhuu0/jibon">
-    <img src="https://img.shields.io/github/license/farhuu0/jibon?style=for-the-badge&color=2ea043" alt="license">
-  </a>
-  <a href="https://github.com/farhuu0/jibon/stargazers">
-    <img src="https://img.shields.io/github/stars/farhuu0/jibon?style=for-the-badge" alt="stars">
-  </a>
-  <a href="https://github.com/farhuu0/jibon/forks">
-    <img src="https://img.shields.io/github/forks/farhuu0/jibon?style=for-the-badge" alt="forks">
-  </a>
-  <a href="https://github.com/farhuu0/jibon/issues">
-    <img src="https://img.shields.io/github/issues/farhuu0/jibon?style=for-the-badge&color=ff5555" alt="issues">
+  <a href="https://files.catbox.moe/2qwm2r.mp4">
+    <img src="https://litter.catbox.moe/na9ir795th4c8y5r.jpg" alt="Watch demo video" width="400"/>
   </a>
 </p>
 
 ---
 
-## 🔗 Table of Contents
-- [About](#-about)
-- [Features](#-features)
-- [Folder Structure](#-folder-structure)
-- [Requirements](#-requirements)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Configuration](#-configuration)
-- [Example Commands](#-example-commands)
-- [Troubleshooting](#-troubleshooting)
-- [Contributing](#-contributing)
-- [Credits](#-credits)
-- [License](#-license)
+## 👤 OWNER INFO
+
+- 👑 Name: **MaHi**
+- 🏙️ From: **Dhaka**
+- 🎂 Age: **16**
 
 ---
 
-## 📖 About
-**Goat Bot v2** একটি আধুনিক Messenger Bot যা ব্যক্তিগত অ্যাকাউন্ট ব্যবহার করে চলে। এতে রয়েছে শক্তিশালী গ্রুপ-ম্যানেজমেন্ট টুলস, মজার কমান্ড এবং সহজ কাস্টমাইজেশন সাপোর্ট।
+## ⚙️ HOW TO RUN ON RENDER
+
+### 🥇 1st Step
+Rename these files:
+- `account.txt` → **`account.dev.txt`**
+- `config.json` → **`config.dev.json`**
+- `configcommands.json` → **`configcommand.dev.json`**
 
 ---
 
-## ✨ Features
-- 🚀 **Fast & Powerful** — দ্রুত রেসপন্স
-- 🧩 **Modular Scripts** — সহজে কমান্ড যোগ/পরিবর্তন
-- 🛡 **Admin Tools** — Kick, Ban, Mute, Warn
-- 🎮 **Fun/Love/Games** — Pair, Mini-games ইত্যাদি
-- 🌍 **Multi-Language** — ভাষা ফাইল দিয়ে লোকালাইজেশন
-- 📝 **Logger** — ইভেন্ট/এরর লগিং
-- 🖥 **Dashboard (optional)** — ওয়েব UI সাপোর্ট
+### 🥈 2nd Step
+- Go to [Render.com](https://render.com) and **sign up**
+- Tap the **left sidebar icon** and choose `Web Service`
+- Connect with GitHub and select your bot repo
+- On setup:
+  - Set **Runtime** to `Node`
+  - Replace **Dockerfile** with `Node`
+- Choose plan ➜ scroll down ➜ click **Deploy Web Service**
+- After deploying, **copy your domain link**
 
 ---
 
-## 📂 Folder Structure
+### 🥉 3rd Step
+Go to [UptimeRobot.com](https://uptimerobot.com) and sign up
+
+- Tap ➕ `Create Monitor`
+- Choose `HTTPS`
+- Paste your domain link
+- Click `Create Monitor`
+
+---
+
+## 🎉 DONE! YOUR BOT IS NOW LIVE 24/7!
+
+---
+
+> 🤖 **Need help?** Contact MaHi or open an issue in the repo.
