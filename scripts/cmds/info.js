@@ -32,9 +32,9 @@ module.exports = {
   },
 
   sendInfo: async function (message) {
-    const botName = "✰→ ғᴀʀʜᴀɴ ʙᴏᴛ ←✰";
-    const authorName = "Fᴀʀʜᴀɴ";
-    const authorFB = "https://www.facebook.com/farhuu.2.0";
+    const botName = "❖❀～ ʜɪɴᴀᴛᴀ ～❀❖";
+    const authorName = "AYAN";
+    const authorFB = "https://www.facebook.com/profile.php?id=61573375301770";
     const authorInsta = "nai";
     const status = "𝗦𝗶𝗻𝗴𝗹𝗲";
 
@@ -47,7 +47,7 @@ module.exports = {
     const hours = Math.floor((uptime / (60 * 60)) % 24);
     const uptimeString = `${hours}h ${minutes}m ${seconds}s`;
 
-    const videoUrl = "https://files.catbox.moe/vlk4vp.mp4"; /*dont use imgur url for this cmd*/
+    const videoUrl = "https://files.catbox.moe/zzc31w.mp4"; /*dont use imgur url for this cmd*/
 
     const body = `
 
