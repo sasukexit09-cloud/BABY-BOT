@@ -1,66 +1,67 @@
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = {
-config: {
-  name: "owner",
-  aurthor:"Tokodori",// Convert By Goatbot Tokodori 
-   role: 0,
-  shortDescription: " ",
-  longDescription: "",
-  category: "admin",
-  guide: "{pn}"
-},
+  config: {
+    name: "owner",
+    version: "2.0",
+    author: "Tarek",
+    shortDescription: "Display bot and owner information",
+    longDescription: "Shows detailed info including bot name, prefix, and owner's personal information.",
+    category: "Special",
+    guide: {
+      en: "{p}{n}",
+    },
+  },
 
-  onStart: async function ({ api, event }) {
-  try {
-    const ownerInfo = {
-      name: 'F A R H A N',
-      gender: '𝐌𝐚𝐥𝐞',
-      age: '16±',
-      height: '5.11',
-      choise: 'Russian 😞',
-      nick: 'Farhu  '
-    };
+  onStart: async function ({ api, event, args, message, usersData }) {
+    const id = event.senderID;
+    const userData = await usersData.get(id);
+    const name = userData.name;
+    const mention = [{ id, tag: name }];
 
-    const bold = 'https://files.catbox.moe/dpgl9a.jpg'; // Replace with your Google Drive videoid link https://drive.google.com/uc?export=download&id=here put your video id
+    // 🛠 Convert Google Drive view link to direct download link
+    const fileId = "1QQ4rcb5mnLytHKuavPxOjx0rF-YuOTaS";
+    const directURL = `https://files.catbox.moe/tmy319.mp4`;
 
-    const tmpFolderPath = path.join(__dirname, 'tmp');
+    // ⏬ Download the file temporarily
+    const filePath = path.join(__dirname, "owner-video.mp4");
+    const response = await axios({
+      url: directURL,
+      method: "GET",
+      responseType: "stream"
+    });
 
-    if (!fs.existsSync(tmpFolderPath)) {
-      fs.mkdirSync(tmpFolderPath);
-    }
+    const writer = fs.createWriteStream(filePath);
+    response.data.pipe(writer);
 
-    const videoResponse = await axios.get(bold, { responseType: 'arraybuffer' });
-    const videoPath = path.join(tmpFolderPath, 'owner_video.mp4');
+    await new Promise((resolve, reject) => {
+      writer.on("finish", resolve);
+      writer.on("error", reject);
+    });
 
-    fs.writeFileSync(videoPath, Buffer.from(videoResponse.data, 'binary'));
+    const info = 
+`━━━━━━━━━━━━━━━━
+👋 𝗛𝗲𝗹𝗹𝗼, ${name}
 
-    const response = ` 
-╭[ .  ]•〆 ᵀᴬᴺᴶᴵᴸ 〆 ]  ─⦿
-╭────────────◊
-├‣ 𝐁𝐨𝐭 & 𝐎𝐰𝐧𝐞𝐫 𝐈𝐧𝐟𝐨𝐫𝐦𝐚𝐭𝐢𝐨𝐧 
-├‣ 𝐍𝐚𝐦𝐞: ${ownerInfo.name}
-├‣ 𝐆𝐞𝐧𝐝𝐞𝐫:  ${ownerInfo.gender}
-├‣ 𝐀𝐠𝐞 .${ownerInfo.age}
-├‣ 𝐍𝐢𝐜𝐤 : ${ownerInfo.nick}
-├‣ 𝐂𝐡𝐨𝐢𝐬𝐞:  ${ownerInfo.choise}   
-├‣ 𝐇𝐞𝐢𝐠𝐡𝐭 : ${ownerInfo.height}
-╰────────────◊ 
-`;
+📌 𝗕𝗢𝗧 𝗜𝗡𝗙𝗢
+• 𝗡𝗮𝗺𝗲➝ ❖❀～ ʜɪɴᴀᴛᴀ ～❀❖
+• 𝗣𝗿𝗲𝗳𝗶𝘅 ➝! 
 
-    await api.sendMessage({
-      body: response,
-      attachment: fs.createReadStream(videoPath)
-    }, event.threadID, event.messageID);
+👤 𝗢𝗪𝗡𝗘𝗥 𝗜𝗡𝗙𝗢
+• 𝗡𝗮𝗺𝗲 ➝ ⚡𝐀𝐘𝐀𝐍✨
+• 𝗚𝗲𝗻𝗱𝗲𝗿 ➝ 𝗠𝗮𝗹𝗲
+• 𝗔𝗴𝗲 ➝ 18💋
+• 𝗦𝘁𝗮𝘁𝘂𝘀 ➝ SINGEL✨
+• 𝗘𝗱𝘂𝗰𝗮𝘁𝗶𝗼𝗻 ➝ 𝗗𝗶𝗽𝗹𝗼𝗺𝗮 𝗶𝗻 𝗖𝗶𝘃𝗶𝗹 𝗘𝗻𝗴𝗶𝗻𝗲𝗲𝗿𝗶𝗻𝗴
+• 𝗟𝗼𝗰𝗮𝘁𝗶𝗼𝗻 ➝ ɢᴀᴢɪᴘᴜʀ⚡
+━━━━━━━━━━━━━━━━━`;
 
-    if (event.body.toLowerCase().includes('ownerinfo')) {
-      api.setMessageReaction('🚀', event.messageID, (err) => {}, true);
-    }
-  } catch (error) {
-    console.error('Error in ownerinfo command:', error);
-    return api.sendMessage('An error occurred while processing the command.', event.threadID);
-  }
-},
+    message.reply({
+      body: info,
+      mentions: mention,
+      attachment: fs.createReadStream(filePath)
+    });
+  }
 };
