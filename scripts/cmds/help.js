@@ -3,7 +3,7 @@ const axios = require("axios");
 const path = require("path");
 const { getPrefix } = global.utils;
 const { commands, aliases } = global.GoatBot;
-const doNotDelete = "[ 𝗔  𝗬 𝗔 𝗡 ]"; 
+const doNotDelete = "[ 𝗔 𝗬 𝗔 𝗡 ]"; 
 
 module.exports = {
   config: {
@@ -64,7 +64,7 @@ module.exports = {
       msg += ``;
       msg += `\n╭─────✰\n│ ╣[𝗔 𝗬 𝗔 𝗡]╠\n╰────────────✰`; 
 
-const helpListImages = [ "https://files.catbox.moe/whgz7k.jpg" ];
+const helpListImages = [ "https://files.catbox.moe/4hu6i6.jpg" ];
 
 
       const helpListImage = helpListImages[Math.floor(Math.random() * helpListImages.length)];
