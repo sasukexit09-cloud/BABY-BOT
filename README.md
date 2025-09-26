@@ -1,8 +1,8 @@
-<h1 align="center">FarHan's Bot </h1>
+<h1 align="center">𝐀𝐅𝐑𝐎𝐙𝐀 𝐁𝐀𝐁𝐘 </h1>
 
 <p align="center">
-  <a href="https://files.catbox.moe/2qwm2r.mp4">
-    <img src="https://litter.catbox.moe/na9ir795th4c8y5r.jpg" alt="Watch demo video" width="400"/>
+  <a href="https://files.catbox.moe/o0hs41.jpg">
+    <img src="https://files.catbox.moe/o0hs41.jpg" alt="Watch demo video" width="400"/>
   </a>
 </p>
 
@@ -10,9 +10,9 @@
 
 ## 👤 OWNER INFO
 
-- 👑 Name: **𝗙𝗮𝗿𝗛𝗮𝗻**
-- 🏙️ From: **𝗦𝗶𝗿𝗮𝗷𝗴𝗮𝗻𝗷**
-- 🎂 Age: **17**
+- 👑 Name: **𝐀𝐅𝐑𝐎𝐙𝐀 𝐁𝐀𝐁𝐘**
+- 🏙️ From: **𝗦𝗘𝗫𝗧𝗘𝗡**
+- 🎂 Age: **18💋**
 
 ---
 
