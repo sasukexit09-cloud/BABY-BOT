@@ -35,7 +35,7 @@ module.exports = {
     const botName = "◦•●♡ʏᴏᴜʀ ᴀꜰʀᴏᴢᴀ ʙʙʏ♡●•◦";
     const authorName = "AYAN";
     const authorFB = "https://www.facebook.com/profile.php?id=61573375301770";
-    const authorInsta = "nai";
+    const authorInsta = "wahat_12am";
     const status = "𝗦𝗶𝗻𝗴𝗹𝗲";
 
     const now = moment().tz('Asia/Dhaka');
