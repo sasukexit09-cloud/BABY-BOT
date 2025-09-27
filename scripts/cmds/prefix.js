@@ -118,7 +118,7 @@ module.exports = {
         + `║ 💬 Chatbox : ${threadPrefix}\n`
         + `║ ➤ ${threadPrefix}help to see all available cmds 🥵\n`
         + "╚═══════════════╝",
-        attachment: await utils.getStreamFromURL("https://files.catbox.moe/yqo59k.jpg")
+        attachment: await utils.getStreamFromURL("https://scontent.xx.fbcdn.net/v/t1.15752-9/552116003_1174574971168444_4024314403252670553_n.jpg?stp=dst-jpg_s480x480_tt6&_nc_cat=108&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeETpSur0t78jIGoDJLUmyxaVOLp22WztBxU4unbZbO0HJIXynToXIFOy6AyfMj2OaYvLihQp3BRYNvmW3GoaU_n&_nc_ohc=WAkcDv1FB5IQ7kNvwEcxCnF&_nc_oc=AdkDH_eORETvwhQchPta63NLT9weLMxPnBP9eqNxYIKcNVHVxUQW8TitQBDGDkrX7HE&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.xx&oh=03_Q7cD3QGb7ZBnIyAxH8K_NIIR4uZph2fIYqrt5A-mJ_A1Q9oqcQ&oe=68FEC5AE")
       });
     }
   }
