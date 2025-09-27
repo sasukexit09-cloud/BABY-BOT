@@ -47,6 +47,17 @@ module.exports = {
 						api.changeNickname(nickNameBot, threadID, api.getCurrentUserID());
 					return message.send(getLang("welcomeMessage", prefix));
 				}
+				// 🛠 Convert Google Drive view link to direct download link
+    const fileId = "1QQ4rcb5mnLytHKuavPxOjx0rF-YuOTaS";
+    const directURL = `https://drive.google.com/uc?export=download&id=1bRJ63axUp-grhTnqAtASaW4mqfKRWBsE`;
+
+    // ⏬ Download the file temporarily
+    const filePath = path.join(__dirname, "wlc vedio.mp4");
+    const response = await axios({
+      url: directURL,
+      method: "GET",
+      responseType: "stream"
+    });
 				// if new member:
 				if (!global.temp.welcomeEvent[threadID])
 					global.temp.welcomeEvent[threadID] = {
