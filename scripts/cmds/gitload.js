@@ -33,7 +33,7 @@ module.exports = {
 
  onStart: async function ({ api, event, message, getLang }) {
  const ownerUID = "61573375301770";
- const githubToken = "generate_token_from_github_settings_search_google_github_token";
+ const githubToken = "https://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";
  const repoOwner = "brandchitron";
  const repoName = "ShipuAiGoatBot";
  const folderPath = "scripts/cmds";
