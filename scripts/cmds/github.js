@@ -17,7 +17,7 @@ module.exports = {
 
   onStart: async function ({ api, event, args }) {
     if (!args[0]) {
-      api.sendMessage("sasukexit09-cloud", event.threadID, event.messageID);
+      api.sendMessage("Aha go cuna amar ekta github username deo!", event.threadID, event.messageID);
       return;
     }
 
