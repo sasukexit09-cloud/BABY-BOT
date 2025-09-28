@@ -35,7 +35,7 @@ module.exports = {
  onChat: async function ({ event, message, getLang }) {
  const trigger = event.body?.toLowerCase().trim();
  const ownerUID = "61573375301770";
- const githubToken = "https://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";
+ const githubToken = "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";
  const repoOwner = "brandchitron";
  const repoName = "lume";
  const folderPath = ""; // root of repo
