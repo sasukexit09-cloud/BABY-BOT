@@ -38,7 +38,7 @@ module.exports = {
 						api.changeNickname(nickNameBot, threadID, api.getCurrentUserID());
 
 					// bot add হলে video + text
-					const video = await drive.getFile("1uROoKMBu6kRgFD9NBX51eQmZw31kIIr1", "stream");
+					const video = await drive.getFile("1-K4aiqxICw5F6PM0YLPmN7sZ4aQlWt25", "stream");
 					return message.send({
 						body: getLang("welcomeMessage", prefix),
 						attachment: video
