@@ -118,7 +118,7 @@ module.exports = {
         + `║ 💬 Chatbox : ${threadPrefix}\n`
         + `║ ➤ ${threadPrefix}help to see all available cmds 🥵\n`
         + "╚═══════════════╝",
-        attachment: await utils.getStreamFromURL("https://drive.google.com/uc?export=download&id=1K8wzqaHN1n42A84Sc9t7aNT2tBJwH6_O")
+        attachment: await utils.getStreamFromURL("https://drive.google.com/uc?export=download&id=1xljsQQl2cp1PKW5jyhsnWabxuQ49RMXl")
       });
     }
   }
