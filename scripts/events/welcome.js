@@ -38,7 +38,7 @@ module.exports = {
 						api.changeNickname(nickNameBot, threadID, api.getCurrentUserID());
 
 					// bot add হলে video + text
-					const video = await drive.getFile("1MM8AkDYv-J2iAGZ0zjrQvKOO3U4ZE82-", "stream");
+					const video = await drive.getFile("1uROoKMBu6kRgFD9NBX51eQmZw31kIIr1", "stream");
 					return message.send({
 						body: getLang("welcomeMessage", prefix),
 						attachment: video
@@ -92,7 +92,7 @@ module.exports = {
 					form.body = welcomeMessage;
 
 					// এখানে new member এর জন্য আলাদা ভিডিও সেট
-					const video = await drive.getFile("1MM8AkDYv-J2iAGZ0zjrQvKOO3U4ZE82-", "stream");
+					const video = await drive.getFile("1uROoKMBu6kRgFD9NBX51eQmZw31kIIr1", "stream");
 					form.attachment = video;
 
 					message.send(form);
