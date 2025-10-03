@@ -55,7 +55,7 @@ module.exports = {
 
       await message.send(leaveMessage);
 
-      const videoMessage = getLang("videoMessage").replace("{videoUrl}", leaveVideoUrl);
+      const videoMessage = getLang("videoMessage");
       return message.send(videoMessage);
     }
 
@@ -71,7 +71,7 @@ module.exports = {
 
       await message.send(kickMessage);
 
-      const videoMessage = getLang("videoMessage").replace("{videoUrl}", kickVideoUrl);
+      const videoMessage = getLang("videoMessage");
       return message.send(videoMessage);
     }
   }
