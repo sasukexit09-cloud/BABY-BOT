@@ -2,42 +2,64 @@ const axios = require("axios");
 
 module.exports = {
   config: {
-    name: "4k",
-    aliases: ["upscale"],
-    version: "1.1",
+    name: "upscale",
+    aliases: ["4k", "2k", "hd", "anime", "imgup", "aiup", "enhance", "upimg", "upres"],
+    version: "1.3",
     role: 0,
-    author: "Fahim_Noob",
+    author: "Fahim_Noob + Modified by ChatGPT",
     countDown: 5,
-    longDescription: "Upscale images to 4K resolution.",
+    longDescription: "Upscale an image to 4K / 2K / HD / Anime style.",
     category: "image",
     guide: {
-      en: "${pn} reply to an image to upscale it to 4K resolution."
+      en: "{pn} [4k | 2k | hd | anime] → Reply to an image to upscale."
     }
   },
-  onStart: async function ({ message, event }) {
-    if (!event.messageReply || !event.messageReply.attachments || !event.messageReply.attachments[0]) {
-      return message.reply("Please reply to an image to upscale it.");
+
+  onStart: async function ({ message, event, args }) {
+    const reply = event.messageReply;
+
+    if (!reply || !reply.attachments || reply.attachments.length === 0) {
+      return message.reply("❌ Please reply to an image to upscale.");
     }
-    const imgurl = encodeURIComponent(event.messageReply.attachments[0].url);
-    const noobs = 'xyz';
-    const upscaleUrl = `https://smfahim.${noobs}/4k?url=${imgurl}`;
-    
-    message.reply("🔄| Processing... Please wait a moment.", async (err, info) => {
-      try {
-        const { data: { image } } = await axios.get(upscaleUrl);
-        const attachment = await global.utils.getStreamFromURL(image, "upscaled-image.png");
 
-        message.reply({
-          body: "✅| Here is your 4K upscaled image:",
-          attachment: attachment
-        });
-        let processingMsgID = info.messageID;
-        message.unsend(processingMsgID);
+    const attachment = reply.attachments[0];
+    if (attachment.type !== "photo") {
+      return message.reply("⚠️ Only photo/image attachments are supported.");
+    }
 
-      } catch (error) {
-        console.error(error);
-        message.reply("❌| There was an error upscaling your image.");
+    const validTypes = ["4k", "2k", "hd", "anime"];
+    const upscaleType = (args[0] || "4k").toLowerCase();
+
+    if (!validTypes.includes(upscaleType)) {
+      return message.reply("❌ Invalid type. Please use one of: 4k, 2k, hd, anime");
+    }
+
+    const imageUrl = encodeURIComponent(attachment.url);
+    const apiUrl = `https://smfahim.xyz/${upscaleType}?url=${imageUrl}`;
+
+    try {
+      const waitMsg = await message.reply(`🔄 Upscaling to **${upscaleType.toUpperCase()}**... Please wait.`);
+
+      const res = await axios.get(apiUrl);
+
+      if (!res.data || !res.data.image) {
+        return message.reply("❌ API did not return a valid image.");
       }
-    });
+
+      const imageStream = await global.utils.getStreamFromURL(res.data.image, `${upscaleType}-upscaled.png`);
+
+      await message.reply({
+        body: `✅ Here's your ${upscaleType.toUpperCase()} upscaled image:`,
+        attachment: imageStream
+      });
+
+      if (waitMsg?.messageID) {
+        message.unsend(waitMsg.messageID);
+      }
+
+    } catch (error) {
+      console.error("Upscale Error:", error);
+      message.reply("❌ Failed to upscale the image. Try again later.");
+    }
   }
 };
