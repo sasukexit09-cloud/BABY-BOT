@@ -2,55 +2,93 @@ module.exports = {
   config: {
     name: "uptime",
     aliases: ["upt", "up"],
-    version: "1.0",
-    author: "BaYjid", // Author is fixed as "BaYjid"
+    version: "4.0",
+    author: "BaYjid",
     role: 0,
     shortDescription: {
-      en: "Displays the total number of users of the bot and check uptime."
+      en: "Displays bot uptime with auto-refreshing live RGB bars"
     },
     longDescription: {
-      en: "Displays the total number of users who have interacted with the bot and check uptime."
+      en: "Displays uptime, memory, CPU, total users, threads with auto-refreshing live RGB bars, inline %, and AYAN HOST signature"
     },
     category: "RUNNING-TIME",
     guide: {
       en: "Type {pn}"
     }
   },
+
   onStart: async function ({ api, event, usersData, threadsData }) {
     try {
-      const allUsers = await usersData.getAll();
-      const allThreads = await threadsData.getAll();
-      const uptime = process.uptime();
-      const memoryUsage = (process.memoryUsage().rss / 1024 / 1024).toFixed(2);  // Memory usage in MB
-      const cpuLoad = (process.cpuUsage().user / 1000).toFixed(2); // CPU load in milliseconds
+      // Function to generate dynamic RGB bars
+      function getDynamicRGBBar(percent, length = 20) {
+        const filledBars = Math.round((percent / 100) * length);
+        let bar = "";
+        for (let i = 1; i <= length; i++) {
+          if (i <= filledBars) {
+            const ratio = i / length;
+            if (ratio <= 0.33) bar += "🟥";
+            else if (ratio <= 0.66) bar += "🟨";
+            else bar += "🟩";
+          } else {
+            bar += "⬛";
+          }
+        }
+        return bar + ` ${percent.toFixed(1)}%`;
+      }
 
-      const hours = Math.floor(uptime / 3600);
-      const minutes = Math.floor((uptime % 3600) / 60);
-      const seconds = Math.floor(uptime % 60);
-      
-      const uptimeString = `
-────────────────────
-⏰  𝗛𝗢𝗨𝗥𝗦 : ${hours} 𝗛𝗥
-⌚ 𝗠𝗜𝗡𝗨𝗧𝗘𝗦 : ${minutes} 𝗠𝗜𝗡
-⏳  𝗦𝗘𝗖𝗢𝗡𝗗𝗦 : ${seconds} 𝗦𝗘𝗖
-🧠 𝗠𝗘𝗠𝗢𝗥𝗬 𝗨𝗦𝗔𝗚𝗘 : ${memoryUsage} MB
-💻 𝗖𝗣𝗨 𝗟𝗢𝗔𝗗 : ${cpuLoad} ms
-────────────────────`;
+      // Function to fetch data and send dashboard
+      const sendDashboard = async () => {
+        const allUsers = await usersData.getAll();
+        const allThreads = await threadsData.getAll();
 
-      api.sendMessage(`
-★─────────────────────────★
-➤ 𝐔𝐏𝐓𝐈𝐌𝐄 ✅
-╭‣ 𝐀𝐝𝐦𝐢𝐧 👑
-╰‣ 𝗔𝗬𝗔𝗡 くめ
-★─────────────────────────★
-${uptimeString}
-👥 𝐓𝐨𝐭𝐚𝐥 𝗨𝘀𝗲𝗿𝘀 : ${allUsers.length}
-🗂️ 𝐓𝐨𝐭𝐚𝐥 𝗧𝗵𝗿𝗲𝗮𝗱𝘀 : ${allThreads.length}
-★─────────────────────────★
-`, event.threadID);
+        const uptime = process.uptime();
+        const hours = Math.floor(uptime / 3600);
+        const minutes = Math.floor((uptime % 3600) / 60);
+        const seconds = Math.floor(uptime % 60);
+
+        const memoryUsage = (process.memoryUsage().rss / 1024 / 1024).toFixed(2);
+        const memoryMax = 1024;
+        const memoryPercent = Math.min((memoryUsage / memoryMax) * 100, 100);
+
+        const cpuUsage = process.cpuUsage();
+        const cpuUserMs = (cpuUsage.user / 1000).toFixed(2);
+        const cpuMax = 1000;
+        const cpuPercent = Math.min((cpuUserMs / cpuMax) * 100, 100);
+
+        const memoryBar = getDynamicRGBBar(memoryPercent);
+        const cpuBar = getDynamicRGBBar(cpuPercent);
+
+        const dashboardMessage = `
+╔════════════════════════════════╗
+║          🤖 BOT DASHBOARD        ║
+╠════════════════════════════════╣
+║ ⏱️ Uptime: ${hours}h ${minutes}m ${seconds}s
+║ 👥 Total Users: ${allUsers.length}
+║ 🗂️ Total Threads: ${allThreads.length}
+║
+║ 🧠 Memory Usage: ${memoryUsage} MB
+║ ${memoryBar}
+║ 💻 CPU Load: ${cpuUserMs} ms
+║ ${cpuBar}
+╠════════════════════════════════╣
+║           AYAN HOST             ║
+╚════════════════════════════════╝
+`;
+
+        // Send or update message
+        await api.sendMessage(dashboardMessage, event.threadID);
+      };
+
+      // Initial send
+      await sendDashboard();
+
+      // Auto-refresh every 10 seconds
+      const refreshInterval = 10000; // 10,000 ms = 10s
+      setInterval(sendDashboard, refreshInterval);
+
     } catch (error) {
       console.error(error);
-      api.sendMessage("❌ **Error**: Something went wrong while fetching the data.", event.threadID);
+      api.sendMessage("❌ Error: Could not fetch uptime data.", event.threadID);
     }
   }
 };
