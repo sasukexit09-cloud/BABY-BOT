@@ -3,7 +3,7 @@ const axios = require("axios");
 const path = require("path");
 const { getPrefix } = global.utils;
 const { commands, aliases } = global.GoatBot;
-const doNotDelete = "[ 𝗬 𝗢 𝗨 𝗥 𝗕 𝗔 𝗕 𝗬 ]"; 
+const doNotDelete = "[ 𝗬 𝗢 𝗨 𝗥 𝗦 𝗘 𝗛 𝗔 ]"; 
 
 module.exports = {
   config: {
@@ -34,7 +34,7 @@ module.exports = {
       const categories = {};
       let msg = "╭───────❁";
 
-      msg += `\n│𝗕𝗔𝗕𝗬 𝗛𝗘𝗟𝗣 𝗟𝗜𝗦𝗧\n╰────────────❁`; 
+      msg += `\n│𝗦𝗘𝗛𝗔 𝗛𝗘𝗟𝗣 𝗟𝗜𝗦𝗧\n╰────────────❁`; 
 
       for (const [name, value] of commands) {
         if (value.config.role > 1 && role < value.config.role) continue;
@@ -60,9 +60,9 @@ module.exports = {
       });
 
       const totalCommands = commands.size;
-      msg += `\n\n╭─────✰[𝗘𝗡𝗝𝗢𝗬]\n│>𝗧𝗢𝗧𝗔𝗟 𝗖𝗠𝗗𝗦: [${totalCommands}].\n│𝗧𝗬𝗣𝗘𝖳:[ ${prefix}𝗛𝗘𝗟𝗣 \n│.]\n╰────────────✰`;
+      msg += `\n\n╭─────✰[𝗘𝗡𝗝𝗢𝗬 𝗦𝗘𝗛𝗔 𝗖𝗠𝗗𝗦]\n│>𝗧𝗢𝗧𝗔𝗟 𝗖𝗠𝗗𝗦: [${totalCommands}].\n│𝗧𝗬𝗣𝗘𝖳:[ ${prefix}𝗛𝗘𝗟𝗣 \n│.]\n╰────────────✰`;
       msg += ``;
-      msg += `\n╭─────✰\n│ ╣[𝗕 𝗔 𝗕 𝗬]╠\n╰────────────✰`; 
+      msg += `\n╭─────✰\n│ ╣[𝗦𝗘𝗛𝗔]╠\n╰────────────✰`; 
 
 const helpListImages = [ "https://drive.google.com/uc?export=download&id=1Bx4mDq23xa6jmwDrZxiCkjbl8w7sfD59" ];
 
