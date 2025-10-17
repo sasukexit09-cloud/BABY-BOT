@@ -29,7 +29,7 @@ module.exports = {
 
     // 🎬 দুটি ভিডিও URL (ইচ্ছা করলে আলাদা দিতে পারো)
     const leaveVideoUrl = "https://files.catbox.moe/82ymr2.mp4";
-    const kickVideoUrl = "https://files.catbox.moe/82ymr2.mp4";
+    const kickVideoUrl = "https://files.catbox.moe/f8ig4l.mp4";
 
     // ===============================
     // 💔 কেউ নিজে গ্রুপ ছাড়লে
