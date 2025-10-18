@@ -5,10 +5,10 @@ const GIFEncoder = require("gifencoder");
 
 module.exports = {
   config: {
-    name: "owner",
-    version: "7.0",
+    name: "owner3",
+    version: "13.0",
     author: "Asif x Maya",
-    shortDescription: "Animated galaxy GIF owner card with name top-left",
+    shortDescription: "Owner card GIF with subtle particles and rainbow info",
     category: "ℹ️ Info",
     guide: { en: ".owner" },
     usePrefix: true
@@ -26,7 +26,7 @@ module.exports = {
       address: "𝗚𝗮𝘇𝗶𝗽𝘂𝗿"
     };
 
-    const width = 800, height = 500, frames = 40;
+    const width = 800, height = 500, frames = 50;
     const encoder = new GIFEncoder(width, height);
     const outPath = path.join(__dirname, "cache", "owner_card.gif");
     await fs.ensureDir(path.dirname(outPath));
@@ -34,7 +34,7 @@ module.exports = {
     encoder.createReadStream().pipe(stream);
     encoder.start();
     encoder.setRepeat(0);
-    encoder.setDelay(80);
+    encoder.setDelay(60);
     encoder.setQuality(10);
 
     const canvas = createCanvas(width, height);
@@ -50,33 +50,68 @@ module.exports = {
       ownerImg = await loadImage("https://files.catbox.moe/j7xeo4.jpg");
     }
 
+    // Pre-generate stars
+    const stars = Array.from({ length: 150 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: Math.random() * 1.5,
+      speed: 0.5 + Math.random()
+    }));
+
+    // Pre-generate subtle particles
+    const particles = Array.from({ length: 80 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: 0.5 + Math.random() * 1,
+      alpha: 0.2 + Math.random() * 0.3,
+      speedX: -0.3 + Math.random() * 0.6,
+      speedY: -0.2 + Math.random() * 0.4
+    }));
+
     for (let f = 0; f < frames; f++) {
-      // 🌌 Background
+      // 🌌 Background gradient
       const bg = ctx.createLinearGradient(0, 0, width, height);
-      bg.addColorStop(0, "#000000");
-      bg.addColorStop(0.5, "#1a1a40");
+      bg.addColorStop(0, "#0c0c1a");
+      bg.addColorStop(0.5, "#1b1b40");
       bg.addColorStop(1, "#3f0d63");
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
-      // ✨ Moving stars
-      for (let i = 0; i < 120; i++) {
-        const x = (Math.random() * width + f * 2) % width;
-        const y = (Math.random() * height + f * 3) % height;
-        const r = Math.random() * 1.2;
+      // 🌟 Stars
+      stars.forEach(star => {
+        star.x += star.speed;
+        if (star.x > width) star.x = 0;
         ctx.beginPath();
-        ctx.arc(x, y, r, 0, 2 * Math.PI);
+        ctx.arc(star.x, star.y, star.r, 0, 2 * Math.PI);
         ctx.fillStyle = "rgba(255,255,255,0.8)";
         ctx.fill();
-      }
+      });
 
-      // 🏷️ Heading
+      // ✨ Subtle particles
+      particles.forEach(p => {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, 2 * Math.PI);
+        ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
+        ctx.fill();
+      });
+
+      // 🏷️ Header with neon glow
       ctx.font = "bold 42px Sans-serif";
       ctx.textAlign = "center";
-      ctx.fillStyle = `hsl(${(f*10)%360},100%,70%)`;
+      ctx.shadowColor = `hsl(${(f*8)%360},100%,70%)`;
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = `hsl(${(f*8)%360},100%,70%)`;
       ctx.fillText("⭐ BOT OWNER INFO ⭐", width/2, 80);
+      ctx.shadowBlur = 0;
 
-      // 📋 Info text
+      // 📋 Info text with rainbow effect
       ctx.textAlign = "left";
       const lines = [
         { label: "👤 Owner:", value: owner.name },
@@ -89,13 +124,17 @@ module.exports = {
         { label: "🏠 Address:", value: owner.address }
       ];
       const startX = 100, startY = 180, lineHeight = 40, labelW = 180;
+
       lines.forEach((item, i) => {
         const y = startY + i * lineHeight;
+        // Label stays yellow
         ctx.font = "bold 22px Sans-serif";
         ctx.fillStyle = "#ffeb66";
         ctx.fillText(item.label, startX, y);
+
+        // Value rainbow effect
         ctx.font = "italic 23px Sans-serif";
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = `hsl(${(f*15 + i*40)%360},100%,70%)`; // Rainbow animation
         ctx.fillText(item.value, startX + labelW, y);
       });
 
@@ -122,36 +161,30 @@ module.exports = {
       ctx.restore();
 
       // 💫 Animated glowing border
-      const borderWidth = 8;
+      const borderWidth = 10;
       const grad = ctx.createLinearGradient(0,0,width,height);
-      grad.addColorStop(0, `hsl(${(f*12)%360},100%,60%)`);
-      grad.addColorStop(1, `hsl(${(f*12+180)%360},100%,60%)`);
+      grad.addColorStop(0, `hsl(${(f*10)%360},100%,60%)`);
+      grad.addColorStop(1, `hsl(${(f*10+180)%360},100%,60%)`);
       ctx.lineWidth = borderWidth;
       ctx.strokeStyle = grad;
-      ctx.shadowBlur = 25;
-      ctx.shadowColor = `hsl(${(f*12)%360},100%,70%)`;
+      ctx.shadowBlur = 35;
+      ctx.shadowColor = `hsl(${(f*10)%360},100%,70%)`;
       ctx.strokeRect(borderWidth/2,borderWidth/2,width-borderWidth,height-borderWidth);
-
-      // 🌈 Owner name glow - top-left corner
-      ctx.font = "bold 28px Sans-serif";
-      ctx.textAlign = "left";
-      ctx.fillStyle = `hsl(${(f*15)%360},100%,70%)`;
-      ctx.fillText(owner.name, 30, 50); // corner position
+      ctx.shadowBlur = 0;
 
       encoder.addFrame(ctx);
     }
 
     encoder.finish();
 
-    stream.on("close", () => {
+    stream.on("finish", async () => {
       api.sendMessage(
-        { body: "✨ Owner Info (Animated Galaxy GIF)", attachment: fs.createReadStream(outPath) },
-        event.threadID,
-        (err, info) => {
-          setTimeout(() => api.unsendMessage(info.messageID), 20000);
-          fs.unlinkSync(outPath);
+        {
+          body: "✨ Professional animated owner card ready with rainbow info!",
+          attachment: fs.createReadStream(outPath)
         },
-        event.messageID
+        event.threadID,
+        () => fs.remove(outPath)
       );
     });
   }
