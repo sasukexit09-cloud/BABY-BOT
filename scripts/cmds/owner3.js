@@ -5,10 +5,10 @@ const GIFEncoder = require("gifencoder");
 
 module.exports = {
   config: {
-    name: "owner3",
-    version: "6.0",
+    name: "owner",
+    version: "7.0",
     author: "Asif x Maya",
-    shortDescription: "All-in-one animated galaxy GIF owner card",
+    shortDescription: "Animated galaxy GIF owner card with name top-left",
     category: "ℹ️ Info",
     guide: { en: ".owner" },
     usePrefix: true
@@ -40,7 +40,7 @@ module.exports = {
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext("2d");
 
-    // Load owner photo once
+    // Load owner photo
     let ownerImg;
     const photoPath = path.join(__dirname, "owner_photo.jpg");
     if (await fs.pathExists(photoPath)) {
@@ -51,7 +51,7 @@ module.exports = {
     }
 
     for (let f = 0; f < frames; f++) {
-      // 🌌 Galaxy background
+      // 🌌 Background
       const bg = ctx.createLinearGradient(0, 0, width, height);
       bg.addColorStop(0, "#000000");
       bg.addColorStop(0.5, "#1a1a40");
@@ -132,11 +132,11 @@ module.exports = {
       ctx.shadowColor = `hsl(${(f*12)%360},100%,70%)`;
       ctx.strokeRect(borderWidth/2,borderWidth/2,width-borderWidth,height-borderWidth);
 
-      // 🌈 Owner name glow
+      // 🌈 Owner name glow - top-left corner
       ctx.font = "bold 28px Sans-serif";
-      ctx.textAlign = "center";
+      ctx.textAlign = "left";
       ctx.fillStyle = `hsl(${(f*15)%360},100%,70%)`;
-      ctx.fillText(owner.name, width/2, height - 50);
+      ctx.fillText(owner.name, 30, 50); // corner position
 
       encoder.addFrame(ctx);
     }
