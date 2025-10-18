@@ -1,204 +1,181 @@
-require("dotenv").config();
-const os = require("os");
 const fs = require("fs-extra");
 const path = require("path");
-const axios = require("axios");
-const Canvas = require("canvas");
+const { createCanvas, loadImage } = require("canvas");
 const GIFEncoder = require("gifencoder");
-
-const W = 1200, H = 700, G = 10;
-const FB_ACCESS_TOKEN =
-  process.env.FB_ACCESS_TOKEN ||
-  "350685531728|62f8ce9f74b12f84c123cc23437a4a32";
-
-const PAL = {
-  bg0: "#091017", bg1: "#0f1823", glow: "#00eaff",
-  accent1: "#00ffae", accent2: "#00b7ff",
-  track: "#01271f", text: "#d8ffec", label: "#8cffe6"
-};
-const FONT = {
-  title: "bold 50px Orbitron",
-  label: "24px Orbitron",
-  small: "26px Orbitron"
-};
-const BORDER = G * 4;
-
-const rr = (c, x, y, w, h, r = 16) => {
-  c.beginPath();
-  c.moveTo(x + r, y);
-  c.arcTo(x + w, y, x + w, y + h, r);
-  c.arcTo(x + w, y + h, x, y + h, r);
-  c.arcTo(x, y + h, x, y, r);
-  c.arcTo(x, y, x + w, y, r);
-  c.closePath();
-};
-
-const dur = s => {
-  const d = Math.floor(s / 86400),
-        h = Math.floor((s % 86400) / 3600),
-        m = Math.floor((s % 3600) / 60);
-  return `${d}d ${h}h ${m}m`;
-};
-
-const avatarCache = new Map();
-async function getAvatar(uid, size = 256) {
-  if (avatarCache.has(uid)) return avatarCache.get(uid);
-  try {
-    const url = `https://graph.facebook.com/${uid}/picture?height=${size}&width=${size}&redirect=false&access_token=${FB_ACCESS_TOKEN}`;
-    const { data } = await axios.get(url);
-    const imgURL = data?.data?.url;
-    if (!imgURL) return null;
-    const imgBuf = (await axios.get(imgURL, { responseType: "arraybuffer" })).data;
-    const img = await Canvas.loadImage(imgBuf);
-    avatarCache.set(uid, img);
-    return img;
-  } catch { return null; }
-}
-
-const COLORS = ["red", "blue", "yellow", "purple"];
-const NAMED_RGB = { red:[255,0,0], blue:[0,0,255], yellow:[255,255,0], purple:[128,0,128] };
-const lerp = (a,b,t)=>a+(b-a)*t;
-const lerpRGB = (c1,c2,t)=>c1.map((v,i)=>Math.round(lerp(v,c2[i],t)));
-const phaseColor = p=>{
-  const s = (p%1)*COLORS.length, i=Math.floor(s), n=(i+1)%COLORS.length, t=s-i;
-  return `rgb(${lerpRGB(NAMED_RGB[COLORS[i]],NAMED_RGB[COLORS[n]],t).join(",")})`;
-};
-
-async function drawFrame(ctx, uid, name, avImg, phase){
-  const bg = ctx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0, PAL.bg0); bg.addColorStop(1, PAL.bg1);
-  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
-
-  ctx.shadowColor = PAL.glow; ctx.shadowBlur = 40;
-  ctx.lineWidth = G; ctx.strokeStyle = PAL.glow;
-  rr(ctx,BORDER,BORDER,W-2*BORDER,H-2*BORDER,G*3); ctx.stroke();
-  ctx.shadowBlur = 0;
-
-  const glow = phaseColor(phase);
-  ctx.font = FONT.title;
-  ctx.save();
-  ctx.lineWidth = 5; ctx.strokeStyle = glow;
-  ctx.shadowColor = glow; ctx.shadowBlur = 30;
-  ctx.strokeText("⚡ SYSTEM STATUS", BORDER+G*4, BORDER+G*6);
-  ctx.restore();
-  const grad = ctx.createLinearGradient(
-    BORDER+G*4,0,
-    BORDER+G*4+ctx.measureText("⚡ SYSTEM STATUS").width,0
-  );
-  grad.addColorStop(0, glow); grad.addColorStop(1, "#ffffff");
-  ctx.fillStyle = grad;
-  ctx.fillText("⚡ SYSTEM STATUS", BORDER+G*4, BORDER+G*6);
-
-  const upS = process.uptime();
-  const upPct = Math.min(upS / 864, 1) * 100;
-  const memUsed = process.memoryUsage().rss / 1048576;
-  const memTotal = os.totalmem() / 1048576;
-  const memPct = (memUsed / memTotal) * 100;
-
-  const barX = BORDER + G * 4, barW = G * 50, barH = G * 3,
-        b1 = BORDER + G * 11, b2 = b1 + barH + G * 3;
-  const bar = (y, p, c, l) => {
-    ctx.fillStyle = PAL.track; rr(ctx, barX, y, barW, barH, G); ctx.fill();
-    ctx.fillStyle = c; rr(ctx, barX, y, barW * p / 100, barH, G); ctx.fill();
-    ctx.font = FONT.label; ctx.fillStyle = PAL.label;
-    ctx.fillText(l, barX + barW + G * 3, y + barH - 3);
-  };
-  bar(b1, upPct, PAL.accent1, `Uptime ${upPct.toFixed(1)} %`);
-  bar(b2, memPct, PAL.accent2, `RAM ${memPct.toFixed(1)} %`);
-
-  ctx.font = "bold 40px Orbitron"; ctx.fillStyle = PAL.text;
-  ctx.fillText(`⏱ Uptime: ${dur(upS)}`, barX, b2 + G * 8);
-
-  const avSize = G * 18, avX = W - BORDER - G * 20 - avSize / 2, avY = BORDER + G * 14 - avSize / 2;
-  const ring = ctx.createLinearGradient(avX, avY, avX + avSize, avY + avSize);
-  ring.addColorStop(0, "red"); ring.addColorStop(.5, "yellow"); ring.addColorStop(1, "blue");
-  ctx.beginPath(); ctx.arc(avX + avSize / 2, avY + avSize / 2, avSize / 2 + 6, 0, Math.PI * 2);
-  ctx.fillStyle = ring; ctx.fill();
-  ctx.save(); ctx.beginPath();
-  ctx.arc(avX + avSize / 2, avY + avSize / 2, avSize / 2, 0, Math.PI * 2); ctx.clip();
-  if (avImg) ctx.drawImage(avImg, avX, avY, avSize, avSize);
-  else ctx.fillStyle = "#233", ctx.fillRect(avX, avY, avSize, avSize);
-  ctx.restore();
-
-  ctx.font = "bold 32px Orbitron";
-  ctx.fillStyle = PAL.label;
-  ctx.shadowColor = "#00ffe0";
-  ctx.shadowBlur = 15;
-  ctx.textAlign = "center";
-  ctx.fillText(name, avX + avSize / 2, avY + avSize + G * 4); // ⬅ নাম নিচে
-  ctx.shadowBlur = 0;
-
-  ctx.font = FONT.small;
-  ctx.fillStyle = PAL.text;
-  ctx.fillText(`ID: ${uid}`, avX + avSize / 2, avY + avSize + G * 7); // ⬅ UID নিচে
-  ctx.textAlign = "start";
-
-  const pY = H - BORDER - G * 22, pW = W - 2 * BORDER - G * 8;
-  rr(ctx, barX, pY, pW, G * 18, G * 2);
-  ctx.fillStyle = "#0b1a25"; ctx.fill();
-  ctx.strokeStyle = PAL.glow; ctx.lineWidth = 2; ctx.stroke();
-
-  ctx.font = "26px Orbitron"; ctx.fillStyle = PAL.text;
-  const info = [
-    `💾 ${memUsed.toFixed(1)} / ${memTotal.toFixed(0)} MB`,
-    `🖥 ${os.platform()} · ${os.arch()}`,
-    `⚙️ Node ${process.version.replace("v", "")}`,
-    `🔧 ${os.cpus()[0].model}`
-  ];
-  info.forEach((t, i) => ctx.fillText(t, barX + G * 2, pY + G * 5 + i * G * 4));
-
-  const sw = ctx.createLinearGradient(0, 0, W, H),
-        sh = (Date.now() % 4000) / 4000;
-  sw.addColorStop(sh - .2, "rgba(255,255,255,0)");
-  sw.addColorStop(sh, "rgba(255,255,255,.10)");
-  sw.addColorStop(sh + .2, "rgba(255,255,255,0)");
-  ctx.fillStyle = sw; ctx.globalCompositeOperation = "lighter";
-  ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = "source-over";
-}
-
-async function makeGif(uid, name) {
-  const outDir = path.join(__dirname, "cache");
-  await fs.ensureDir(outDir);
-  const outPath = path.join(outDir, `uptime_${uid}.gif`);
-  const enc = new GIFEncoder(W, H);
-  enc.start(); enc.setRepeat(0); enc.setDelay(160); enc.setQuality(20);
-  const canvas = Canvas.createCanvas(W, H), ctx = canvas.getContext("2d");
-  const avImg = await getAvatar(uid);
-  for (let i = 0; i < 8; i++) {
-    await drawFrame(ctx, uid, name, avImg, i / 8);
-    enc.addFrame(ctx);
-  }
-  enc.finish();
-  fs.writeFileSync(outPath, enc.out.getData());
-  return outPath;
-}
 
 module.exports = {
   config: {
-    name: "up3",
-    version: "11.6-final-fixed",
-    author: "- AYAN ✈︎ 🎀",
-    cooldown: 8,
-    role: 0,
-    shortDescription: "Animated uptime card GIF (accurate)",
-    longDescription: "Shows uptime, RAM, platform, and system info in animated card",
-    category: "system",
-    guide: "{p}up"
+    name: "owner3",
+    version: "12.0",
+    author: "Ayan x Maya",
+    shortDescription: "Animated galaxy GIF owner card with flashy stars & rainbow info",
+    category: "ℹ️ Info",
+    guide: { en: ".owner" },
+    usePrefix: true
   },
-  onStart: async ({ api, event }) => {
-    try {
-      const info = await api.getUserInfo(event.senderID);
-      const name = info[event.senderID]?.name || "User";
-      const gif = await makeGif(event.senderID, name);
-      await api.sendMessage({
-        body: "𝗢𝗪𝗡𝗘𝗥 : AYAN ✈︎ 🎀",
-        attachment: fs.createReadStream(gif)
-      }, event.threadID, () => {
-        fs.unlink(gif, () => {});
-      });
-    } catch (e) {
-      console.error(e);
-      api.sendMessage("❌ Couldn't generate animated card.", event.threadID);
+
+  onStart: async function ({ api, event }) {
+    const owner = {
+      whatsapp: "0191***7459",
+      botName: "◦•●♡ʏᴏᴜʀ ʙʙʏ♡●•◦",
+      nickName: "𝗔𝗬𝗔𝗡",
+      class: "𝗜𝗻𝘁𝗲𝗿 2𝗻𝗱 𝗬𝗲𝗮𝗿",
+      religion: "𝗜𝘀𝗹𝗮𝗺",
+      relationship: "𝗦𝗶𝗻𝗴𝗹𝗲",
+      address: "𝗚𝗮𝘇𝗶𝗽𝘂𝗿"
+    };
+
+    const width = 800, height = 500, frames = 40;
+    const encoder = new GIFEncoder(width, height);
+    const outPath = path.join(__dirname, "cache", "owner_card.gif");
+    await fs.ensureDir(path.dirname(outPath));
+    const stream = fs.createWriteStream(outPath);
+    encoder.createReadStream().pipe(stream);
+    encoder.start();
+    encoder.setRepeat(0);
+    encoder.setDelay(70); // Faster GIF
+    encoder.setQuality(15);
+
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext("2d");
+
+    // Load owner photo
+    let ownerImg;
+    const photoPath = path.join(__dirname, "owner_photo.jpg");
+    if (await fs.pathExists(photoPath)) {
+      ownerImg = await loadImage(photoPath);
+    } else {
+      ownerImg = await loadImage("https://files.catbox.moe/j7xeo4.jpg");
     }
+
+    // Pre-generate more stars for dynamic effect
+    const starCount = 200; // Increased number of stars
+    const stars = Array.from({ length: starCount }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: Math.random() * 2,
+      twinkleSpeed: Math.random() * 0.1 + 0.05, // faster twinkle
+      opacity: Math.random() * 0.5 + 0.5
+    }));
+
+    for (let f = 0; f < frames; f++) {
+      // 🌌 Background
+      const bg = ctx.createLinearGradient(0, 0, width, height);
+      bg.addColorStop(0, "#000000");
+      bg.addColorStop(0.5, "#1a1a40");
+      bg.addColorStop(1, "#3f0d63");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, width, height);
+
+      // ✨ Flashy & fast twinkling stars
+      stars.forEach(star => {
+        star.x = (star.x + 4) % width; // faster movement
+        star.y = (star.y + 3) % height; // faster movement
+        star.opacity += star.twinkleSpeed * (Math.random() > 0.5 ? 1 : -1);
+        if (star.opacity > 1) star.opacity = 1;
+        if (star.opacity < 0.2) star.opacity = 0.2;
+
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.r, 0, 2 * Math.PI);
+        ctx.fillStyle = `rgba(255,255,255,${star.opacity})`;
+        ctx.fill();
+      });
+
+      // 🏷️ Heading
+      ctx.font = "bold 42px Sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillStyle = `hsl(${(f*10)%360},100%,70%)`;
+      ctx.fillText("⭐ BOT OWNER INFO ⭐", width/2, 80);
+
+      // 📋 Info text with flashy rainbow glow
+      ctx.textAlign = "left";
+      const lines = [
+        { label: "📱 WhatsApp:", value: owner.whatsapp },
+        { label: "🤖 Bot Name:", value: owner.botName },
+        { label: "📝 Nickname:", value: owner.nickName },
+        { label: "🏫 Class:", value: owner.class },
+        { label: "🕋 Religion:", value: owner.religion },
+        { label: "❤️ Relation:", value: owner.relationship },
+        { label: "🏠 Address:", value: owner.address }
+      ];
+
+      const startX = 100, startY = 180, lineHeight = 40, labelW = 180;
+      lines.forEach((item, i) => {
+        const y = startY + i * lineHeight;
+
+        // Flashy glow effect with faster sine wave
+        const hue = (f*25 + i*60) % 360;
+        const glowIntensity = 12 + 12 * Math.abs(Math.sin((f + i*5)/frames * Math.PI * 2));
+        ctx.shadowBlur = glowIntensity;
+        ctx.shadowColor = `hsl(${hue},100%,70%)`;
+
+        ctx.font = "bold 22px Sans-serif";
+        ctx.fillStyle = `hsl(${hue},100%,70%)`;
+        ctx.fillText(item.label, startX, y);
+
+        ctx.font = "italic 23px Sans-serif";
+        ctx.fillStyle = `hsl(${(hue+30)%360},100%,90%)`;
+        ctx.fillText(item.value, startX + labelW, y);
+
+        ctx.shadowBlur = 0;
+      });
+
+      // 🖼️ Owner photo with rounded corners & pulsing glow
+      const photoW = 140, photoH = 140;
+      const xPhoto = width - photoW - 40;
+      const yPhoto = height - photoH - 60;
+      const radius = 18;
+
+      const glow = 10 + 5 * Math.sin((f / frames) * 2 * Math.PI); // slightly more intense glow
+      ctx.save();
+      ctx.shadowBlur = glow;
+      ctx.shadowColor = `hsl(${(f*12)%360},100%,70%)`;
+      ctx.fillStyle = "#00000000";
+      ctx.fillRect(xPhoto - 2, yPhoto - 2, photoW + 4, photoH + 4);
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(xPhoto + radius, yPhoto);
+      ctx.lineTo(xPhoto + photoW - radius, yPhoto);
+      ctx.quadraticCurveTo(xPhoto + photoW, yPhoto, xPhoto + photoW, yPhoto + radius);
+      ctx.lineTo(xPhoto + photoW, yPhoto + photoH - radius);
+      ctx.quadraticCurveTo(xPhoto + photoW, yPhoto + photoH, xPhoto + photoW - radius, yPhoto + photoH);
+      ctx.lineTo(xPhoto + radius, yPhoto + photoH);
+      ctx.quadraticCurveTo(xPhoto, yPhoto + photoH, xPhoto, yPhoto + photoH - radius);
+      ctx.lineTo(xPhoto, yPhoto + radius);
+      ctx.quadraticCurveTo(xPhoto, yPhoto, xPhoto + radius, yPhoto);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(ownerImg, xPhoto, yPhoto, photoW, photoH);
+      ctx.restore();
+
+      // 💫 Animated glowing border
+      const borderWidth = 6;
+      const grad = ctx.createLinearGradient(0,0,width,height);
+      grad.addColorStop(0, `hsl(${(f*12)%360},100%,60%)`);
+      grad.addColorStop(1, `hsl(${(f*12+180)%360},100%,60%)`);
+      ctx.lineWidth = borderWidth;
+      ctx.strokeStyle = grad;
+      ctx.shadowBlur = 25;
+      ctx.shadowColor = `hsl(${(f*12)%360},100%,70%)`;
+      ctx.strokeRect(borderWidth/2,borderWidth/2,width-borderWidth,height-borderWidth);
+
+      encoder.addFrame(ctx);
+    }
+
+    encoder.finish();
+
+    stream.on("close", () => {
+      api.sendMessage(
+        { body: "✨ Owner Info (Dynamic Galaxy GIF)", attachment: fs.createReadStream(outPath) },
+        event.threadID,
+        (err, info) => {
+          setTimeout(() => api.unsendMessage(info.messageID), 20000);
+          fs.unlinkSync(outPath);
+        },
+        event.messageID
+      );
+    });
   }
 };
