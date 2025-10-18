@@ -1,195 +1,129 @@
 const { config } = global.GoatBot;
+const { createCanvas, loadImage } = require("canvas");
+const GIFEncoder = require("gifencoder");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = {
     config: {
         name: "balance",
         aliases: ["bal", "money"],
-        version: "1.6.9",
+        version: "2.3.0",
         author: "Nazrul",
         countDown: 1,
         role: 0,
-        description: "View, transfer, request, or add/delete money",
-        category: "economy",
-        guide: { en: `
-            {pn}: help to view cmds guide
-            {pn}: view your balance
-            {pn} <@tag>: view the balance of the tagged person
-            {pn} transfer <@tag>/<UID>/<reply> <amount>: transfer money
-            {pn} request <amount>: request money from the admin
-            {pn} add <@tag>/<UID>/<reply> <amount>: admin adds money
-            {pn} delete <@tag>/<UID>/<reply> <amount>: admin deletes money` }
+        description: "Super Animated Dashboard Balance GIF with profile pic",
+        category: "economy"
     },
 
-    onStart: async function ({ message, usersData, event, args, api }) {
+    onStart: async function({ message, usersData, event, args, api }) {
         const senderID = event.senderID;
-        const allowedUIDs = [config.adminBot, ...config.adminBot];
+        const targetUID = args[0] || (event.messageReply ? event.messageReply.senderID : senderID);
+        const userData = await usersData.get(targetUID) || {};
+        const username = userData.name || "Unknown";
+        const balance = Number(userData.money || 0);
+        const avatarURL = userData.avatar || null; // যদি profile pic থাকে
 
-        const formatMoney = (num) => {
-            const units = ["", "K", "M", "B", "T", "Q", "Qi", "Sx", "Sp", "Oc", "N", "D"];
-            let unit = 0;
-            let number = Number(num);
+        const width = 720;
+        const height = 300;
+        const frames = 70;
 
-            while (number >= 1000 && unit < units.length - 1) {
-                number /= 1000;
-                unit++;
+        const encoder = new GIFEncoder(width, height);
+        encoder.start();
+        encoder.setRepeat(0);
+        encoder.setDelay(50);
+        encoder.setQuality(10);
+
+        const canvas = createCanvas(width, height);
+        const ctx = canvas.getContext("2d");
+
+        let avatarImage = null;
+        if (avatarURL) {
+            try {
+                avatarImage = await loadImage(avatarURL);
+            } catch (e) {
+                avatarImage = null;
             }
-
-            return `${number.toFixed(2)}${units[unit]}`;
-        };
-
-        const isValidAmount = (value) => {
-            const num = Number(value);
-            return !isNaN(num) && num > 0;
-        };
-
-        const getTargetUID = () => {
-            if (event.messageReply) return event.messageReply.senderID;
-            if (Object.keys(event.mentions).length > 0) return Object.keys(event.mentions)[0];
-            if (!isNaN(args[1])) return args[1];
-            return null;
-        };
-
-        const getAmount = () => args[args.length - 1];
-
-        if (args[0] === "help") {
-            return message.reply(`1.${config.prefix} balance: View your balance.
-2. ${config.prefix} balance <@tag>: View another user's balance.
-3. ${config.prefix} balance transfer <UID> <amount>: Transfer money.
-4. ${config.prefix} balance request <amount>: Request money from admin.
-5. ${config.prefix} balance add <UID> <amount>: Admin adds money.
-6. ${config.prefix} balance delete <UID> <amount>: Admin deletes money.`);
         }
 
-        if (args[0] === "add") {
-            if (!allowedUIDs.includes(senderID)) {
-                return message.reply("❌ You don't have permission to use this command.");
+        for (let i = 0; i < frames; i++) {
+            const hueBg = (i*4)%360;
+            const hueText = (i*10)%360;
+            const scale = 1 + 0.05 * Math.sin(i*0.5);
+
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0,0,width,height);
+            gradient.addColorStop(0, `hsl(${hueBg},100%,25%)`);
+            gradient.addColorStop(0.5, `hsl(${(hueBg+60)%360},100%,30%)`);
+            gradient.addColorStop(1, `hsl(${(hueBg+180)%360},100%,35%)`);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0,0,width,height);
+
+            // Profile pic circle
+            if (avatarImage) {
+                ctx.save();
+                const avatarSize = 80;
+                ctx.beginPath();
+                ctx.arc(100, height/2, avatarSize/2, 0, Math.PI*2);
+                ctx.closePath();
+                ctx.clip();
+                ctx.drawImage(avatarImage, 60, height/2-40, avatarSize, avatarSize);
+                ctx.restore();
             }
 
-            const targetUID = getTargetUID();
-            const amount = getAmount();
+            // Glowing username
+            ctx.save();
+            ctx.translate(width/2, height/3);
+            ctx.scale(scale, scale);
+            ctx.font = "bold 44px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.shadowColor = `hsl(${hueText},100%,50%)`;
+            ctx.shadowBlur = 35;
+            ctx.fillStyle = `hsl(${hueText},100%,50%)`;
+            ctx.fillText(username, 0, 0);
+            ctx.restore();
 
-            if (!targetUID) {
-                return message.reply("❌ Could not identify the user. Make sure to tag, reply, or provide a valid UID.");
+            // Glowing balance
+            ctx.save();
+            const displayedBalance = Math.floor((balance/frames)*i);
+            ctx.translate(width/2, (height/3)*2);
+            ctx.scale(scale, scale);
+            ctx.font = "bold 40px Arial";
+            ctx.shadowColor = `hsl(${(hueText+90)%360},100%,50%)`;
+            ctx.shadowBlur = 30;
+            ctx.fillStyle = `hsl(${(hueText+90)%360},100%,50%)`;
+            ctx.fillText(`Balance: $${displayedBalance}`, 0, 0);
+            ctx.restore();
+
+            // Mini balance chart
+            ctx.save();
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x=0; x<50; x++){
+                const y = Math.sin((x+i)/10) * 15 + 50;
+                ctx.lineTo(500 + x*2, height-60 - y);
             }
-            if (!isValidAmount(amount)) {
-                return message.reply("❌ Please provide a valid positive amount.");
+            ctx.stroke();
+            ctx.restore();
+
+            // Sparkle effect
+            for(let s=0;s<12;s++){
+                const x = Math.random()*width;
+                const y = Math.random()*height;
+                ctx.fillStyle = `hsl(${Math.random()*360},100%,85%)`;
+                ctx.fillRect(x,y,2,2);
             }
 
-            const userData = await usersData.get(targetUID) || { money: "0" };
-            const userName = userData.name || "Unknown User";
-            const newBalance = (Number(userData.money) + Number(amount)).toString();
-
-            await usersData.set(targetUID, { money: newBalance });
-
-            return message.reply(`✅ Successfully added ${formatMoney(amount)}$ to the balance of ${userName} (UID: ${targetUID}).`);
+            encoder.addFrame(ctx);
         }
 
-        if (args[0] === "delete") {
-            if (!allowedUIDs.includes(senderID)) {
-                return message.reply("❌ You don't have permission to use this command.");
-            }
+        encoder.finish();
+        const buffer = encoder.out.getData();
+        const gifPath = `./cache/balance_${targetUID}.gif`;
+        fs.writeFileSync(gifPath, buffer);
 
-            const targetUID = getTargetUID();
-            const amount = getAmount();
-
-            if (!targetUID) {
-                return message.reply("❌ Could not identify the user. Make sure to tag, reply, or provide a valid UID.");
-            }
-            if (!isValidAmount(amount)) {
-                return message.reply("❌ Please provide a valid positive amount.");
-            }
-
-            const userData = await usersData.get(targetUID) || { money: "0" };
-            const userName = userData.name || "Unknown User";
-            const currentBalance = Number(userData.money);
-
-            if (currentBalance < Number(amount)) {
-                return message.reply("❌ The target does not have enough money to delete.");
-            }
-
-            const newBalance = (currentBalance - Number(amount)).toString();
-
-            await usersData.set(targetUID, { money: newBalance });
-
-            return message.reply(`✅ Successfully deleted ${formatMoney(amount)}$ from the balance of ${userName} (UID: ${targetUID}).`);
-        }
-
-        if (args[0] === "transfer") {
-            const targetUID = getTargetUID();
-            const amount = getAmount();
-
-            if (!targetUID) {
-                return message.reply("❌ Could not identify the user. Make sure to tag, reply, or provide a valid UID.");
-            }
-            if (targetUID === senderID) {
-                return message.reply("❌ You cannot transfer money to yourself.");
-            }
-            if (!isValidAmount(amount)) {
-                return message.reply("❌ Please provide a valid positive amount.");
-            }
-
-            const senderData = await usersData.get(senderID) || { money: "0" };
-            const recipientData = await usersData.get(targetUID) || { money: "0" };
-            const recipientName = recipientData.name || "Unknown User";
-
-            const senderBalance = Number(senderData.money);
-            const recipientBalance = Number(recipientData.money);
-
-            if (senderBalance < Number(amount)) {
-                return message.reply("❌ You don't have enough money to transfer.");
-            }
-
-            const updatedSenderBalance = (senderBalance - Number(amount)).toString();
-            const updatedRecipientBalance = (recipientBalance + Number(amount)).toString();
-
-            await usersData.set(senderID, { money: updatedSenderBalance });
-            await usersData.set(targetUID, { money: updatedRecipientBalance });
-
-            return message.reply(`✅ Successfully transferred ${formatMoney(amount)}$ to ${recipientName} (UID: ${targetUID}).`);
-        }
-
-        if (args[0] === "request") {
-            const amount = args[1];
-
-            if (!isValidAmount(amount)) {
-                return message.reply("❌ Please enter a valid positive amount.");
-            }
-
-            const data = await usersData.get(senderID);
-            const name = data.name || "Darling";
-
-            const adminIDs = ["61573375301770"];
-            const threadIDs = ["61573375301770", "61573375301770"];
-
-            const requestMessage = `📢 User ${name} (${senderID}) has requested ${formatMoney(amount)}$.`;
-
-            for (const adminID of adminIDs) {
-                api.sendMessage(requestMessage, adminID);
-            }
-            for (const threadID of threadIDs) {
-                api.sendMessage(requestMessage, threadID);
-            }
-
-            return message.reply(`✅ Your request for ${formatMoney(amount)}$ has been sent to the admins.`);
-        }
-
-        if (Object.keys(event.mentions).length > 0 || event.messageReply || !isNaN(args[0])) {
-            const targetUID = getTargetUID();
-
-            if (!targetUID) {
-                return message.reply("❌ Could not identify the user. Use UID instead.");
-            }
-
-            const userData = await usersData.get(targetUID) || { money: "0", name: "Unknown User" };
-            const userName = userData.name || "Unknown User";
-            const userMoney = userData.money || "0";
-
-            return message.reply(`💰 ${userName} (UID: ${targetUID}) has ${formatMoney(userMoney)}$ (${userMoney}$).`);
-        }
-
-        const userData = await usersData.get(senderID) || { money: "0", name: "Unknown User" };
-        const userName = userData.name || "Unknown User";
-
-        return message.reply(`💸 ${userName}, you have ${formatMoney(userData.money)}$ (${userData.money}$).`);
+        return api.sendMessage({ attachment: fs.createReadStream(gifPath) }, event.threadID, () => fs.unlinkSync(gifPath));
     }
 };
