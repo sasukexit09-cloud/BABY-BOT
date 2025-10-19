@@ -1,7 +1,7 @@
 // mention_full.js
 module.exports = {
   config: {
-    name: "mention",
+    name: "tag",
     aliases: ["tag","mt"],
     version: "1.2",
     author: "Maya",
