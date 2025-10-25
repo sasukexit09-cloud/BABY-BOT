@@ -1,84 +1,98 @@
-const { getTime } = global.utils;
+const { getTime, drive } = global.utils;
 
 module.exports = {
-  config: {
-    name: "leave",
-    version: "1.3",
-    author: "Tarek + Maya",
-    category: "events"
-  },
+	config: {
+		name: "leave",
+		version: "1.4",
+		author: "NTKhang",
+		category: "events"
+	},
 
-  langs: {
-    en: {
-      session1: "𝗺𝗼𝗿𝗻𝗶𝗻𝗴",
-      session2: "𝗻𝗼𝗼𝗻",
-      session3: "𝗮𝗳𝘁𝗲𝗿𝗻𝗼𝗼𝗻",
-      session4: "𝗲𝘃𝗲𝗻𝗶𝗻𝗴",
-      leaveMessage: "💔 {userName} has left {boxName}...\nWe’ll miss you 😢\nHave a good {session}!",
-      kickMessage: "⚠️ {userName} has been removed from {boxName}!\nPlease follow the rules next time."
-    }
-  },
+	langs: {
+		vi: {
+			session1: "sáng",
+			session2: "trưa",
+			session3: "chiều",
+			session4: "tối",
+			leaveType1: "tự rời",
+			leaveType2: "bị kick",
+			defaultLeaveMessage: "{userName} đã {type} khỏi nhóm"
+		},
+		en: {
+			session1: "morning",
+			session2: "noon",
+			session3: "afternoon",
+			session4: "evening",
+			leaveType1: "left",
+			leaveType2: "was kicked from",
+			defaultLeaveMessage: "{userName} {type} the group"
+		}
+	},
 
-  onStart: async ({ threadsData, message, event, api, getLang }) => {
-    const hours = getTime("HH");
-    const { threadID, logMessageData, logMessageType } = event;
-    const threadData = await threadsData.get(threadID);
+	onStart: async ({ threadsData, message, event, api, usersData, getLang }) => {
+		if (event.logMessageType == "log:unsubscribe")
+			return async function () {
+				const { threadID } = event;
+				const threadData = await threadsData.get(threadID);
+				if (!threadData.settings.sendLeaveMessage)
+					return;
+				const { leftParticipantFbId } = event.logMessageData;
+				if (leftParticipantFbId == api.getCurrentUserID())
+					return;
+				const hours = getTime("HH");
 
-    // যদি leave/kick মেসেজ বন্ধ থাকে
-    if (threadData.settings.sendLeaveMessage == false) return;
+				const threadName = threadData.threadName;
+				const userName = await usersData.getName(leftParticipantFbId);
 
-    // 🎬 দুটি ভিডিও URL (ইচ্ছা করলে আলাদা দিতে পারো)
-    const leaveVideoUrl = "https://files.catbox.moe/82ymr2.mp4";
-    const kickVideoUrl = "https://files.catbox.moe/f8ig4l.mp4";
+				// {userName}   : name of the user who left the group
+				// {type}       : type of the message (leave)
+				// {boxName}    : name of the box
+				// {threadName} : name of the box
+				// {time}       : time
+				// {session}    : session
 
-    // ===============================
-    // 💔 কেউ নিজে গ্রুপ ছাড়লে
-    // ===============================
-    if (logMessageType == "log:unsubscribe") {
-      const leftUserId = logMessageData.leftParticipantFbId;
-      const userInfo = await api.getUserInfo(leftUserId);
-      const userName = userInfo[leftUserId]?.name || "Someone";
+				let { leaveMessage = getLang("defaultLeaveMessage") } = threadData.data;
+				const form = {
+					mentions: leaveMessage.match(/\{userNameTag\}/g) ? [{
+						tag: userName,
+						id: leftParticipantFbId
+					}] : null
+				};
 
-      let { leaveMessage = getLang("leaveMessage") } = threadData.data;
-      leaveMessage = leaveMessage
-        .replace(/\{userName\}/g, userName)
-        .replace(/\{boxName\}|\{threadName\}/g, threadData.threadName)
-        .replace(
-          /\{session\}/g,
-          hours <= 10
-            ? getLang("session1")
-            : hours <= 12
-            ? getLang("session2")
-            : hours <= 18
-            ? getLang("session3")
-            : getLang("session4")
-        );
+				leaveMessage = leaveMessage
+					.replace(/\{userName\}|\{userNameTag\}/g, userName)
+					.replace(/\{type\}/g, leftParticipantFbId == event.author ? getLang("leaveType1") : getLang("leaveType2"))
+					.replace(/\{threadName\}|\{boxName\}/g, threadName)
+					.replace(/\{time\}/g, hours)
+					.replace(/\{session\}/g, hours <= 10 ?
+						getLang("session1") :
+						hours <= 12 ?
+							getLang("session2") :
+							hours <= 18 ?
+								getLang("session3") :
+								getLang("session4")
+					);
 
-      // ভিডিওসহ মেসেজ পাঠানো
-      return message.send({
-        body: leaveMessage,
-        attachment: await global.utils.getStreamFromURL(leaveVideoUrl)
-      });
-    }
+				form.body = leaveMessage;
 
-    // ===============================
-    // ⚠️ কাউকে কিক করলে
-    // ===============================
-    if (logMessageType == "log:admin_removed") {
-      const kickedUserId = logMessageData.userFbId;
-      const userInfo = await api.getUserInfo(kickedUserId);
-      const userName = userInfo[kickedUserId]?.name || "Someone";
+				if (leaveMessage.includes("{userNameTag}")) {
+					form.mentions = [{
+						id: leftParticipantFbId,
+						tag: userName
+					}];
+				}
 
-      let { kickMessage = getLang("kickMessage") } = threadData.data;
-      kickMessage = kickMessage
-        .replace(/\{userName\}/g, userName)
-        .replace(/\{boxName\}|\{threadName\}/g, threadData.threadName);
-
-      // ভিডিওসহ মেসেজ পাঠানো
-      return message.send({
-        body: kickMessage,
-        attachment: await global.utils.getStreamFromURL(kickVideoUrl)
-      });
-    }
-  }
+				if (threadData.data.leaveAttachment) {
+					const files = threadData.data.leaveAttachment;
+					const attachments = files.reduce((acc, file) => {
+						acc.push(drive.getFile(file, "stream"));
+						return acc;
+					}, []);
+					form.attachment = (await Promise.allSettled(attachments))
+						.filter(({ status }) => status == "fulfilled")
+						.map(({ value }) => value);
+				}
+				message.send(form);
+			};
+	}
 };
