@@ -1,7 +1,7 @@
-<h1 align="center">🌸ꗥ～ꗥ🌸 𝐁𝐀𝐁𝐘 𝐁𝐎𝐓 🌸ꗥ～ꗥ🌸 </h1>
+<h1 align="center">ꗥ～ꗥ💌 𝐁𝐀𝐁𝐘 𝐁𝐎𝐓 💌ꗥ～ꗥ </h1>
 
 <p align="center">
-  <a href="https://files.catbox.moe/o0hs41.jpg">
+  <a href="https://files.catbox.moe/u63pis.jpeg">
     <img src="https://files.catbox.moe/o0hs41.jpg" alt="Watch demo video" width="400"/>
   </a>
 </p>
