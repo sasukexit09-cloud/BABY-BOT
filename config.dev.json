@@ -13,20 +13,20 @@
   "checkApproval": true,
   "language": "en",
   "notesLanguage": "change to your language with ISO 639-1 code, available languages: vi (Vietnamese), en (English)",
-  "nickNameBot": "◦•●🦊𝗙𝗢𝗫𝗬-𝗕𝗕𝗘🦊●•◦",
+  "nickNameBot": "— 𝚃𝙾𝙽𝚄 -✨",
   "prefix": "!",
   "adminOnly": {
     "enable": false,
     "ignoreCommand": []
   },
-  "DEV": ["61582355550594","61579795833614"],
+  "DEV": ["61586483766006"],
   "adminBot": [
-    "61582355550594","61579795833614"
+    "61586483766006",""
   ],
   "whiteListMode": {
     "enable": false,
     "whiteListIds": [
-      "61579795833614"
+      "61586483766006"
     ],
     "notes": "if you enable this feature, only the ids in the whiteListIds list can use the bot"
   },
