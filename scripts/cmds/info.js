@@ -6,7 +6,7 @@
 ‎    name: "info",
 ‎    aliases: ["inf", "in4"],
 ‎    version: "2.0",
-‎    author: " Eren",
+‎    author: "AYAN",
 ‎    countDown: 5,
 ‎    role: 0,
 ‎    shortDescription: {
@@ -32,11 +32,11 @@
 ‎  },
 ‎
 ‎  sendInfo: async function (message) {
-‎    const botName = "◦•●🦊𝗙𝗢𝗫𝗬-𝗕𝗕𝗘🦊●•◦";
-‎    const authorName = "[SOJIB]💋🥵";
-‎    const authorFB = "https://www.facebook.com/profile.php?id=61579795833614";
-‎    const authorInsta = "wahat_12am";
-‎    const status = "𝗦𝗶𝗻𝗴𝗹𝗲";
+‎    const botName = "— 𝚃𝙾𝙽𝚄 -✨";
+‎    const authorName = "— A𝚔𝚊𝚜𝚑 𝙲𝚑𝚘𝚠𝚍𝚑𝚘𝚛𝚢-💌";
+‎    const authorFB = "https://www.facebook.com/profile.php?id=61586483766006";
+‎    const authorInsta = "https://www.instagram.com/to5282nu?igsh=bzBwanVyZHVmZm5x";
+‎    const status = "𝚂𝚒𝚗𝚐𝚕𝚎";
 ‎
 ‎    const now = moment().tz('Asia/Dhaka');
 ‎    const time = now.format('h:mm:ss A');
